@@ -8,6 +8,7 @@ It configures Apache VirtualHosts, optionally imports Magento sample data, insta
 Designed for use with [Vagrant](http://www.vagrantup.com/).
 
 It's a work in progress; currently only tested on Mac OS X 10.8.
+Used with https://github.com/rjocoleman/vagrant-magento-mirror
 
 
 REQUIREMENTS
@@ -69,7 +70,7 @@ License and Author
 * Author:: Robert Coleman <github@robert.net.nz>
 
 
-* Copyright:: 2012, Etailer Limited
+* Copyright:: 2012
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
