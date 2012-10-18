@@ -1,0 +1,3 @@
+cookbook "vagrant_magento" do
+  configuration "default"
+end
