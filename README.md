@@ -57,7 +57,7 @@ Todo
 * Cope with different sample data versions.
 * allow the prefixing sample data.
 * Make things more generic and portable.
-* Testing, testing, testing.
+* Testing, testing, testing and more testing.
 * Caching mechanisms.
   + Dependancies.
   + Mage config.
