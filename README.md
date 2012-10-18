@@ -1,7 +1,7 @@
 vagrant_magento Cookbook
 ========================
 
-[![Build Status](https://secure.travis-ci.org/etailer/vagrant_magento.png)](http://travis-ci.org/etailer/vagrant_magento)
+[![Build Status](https://secure.travis-ci.org/rjocoleman/vagrant_magento.png)](http://travis-ci.org/rjocoleman/vagrant_magento)
 
 This cookbook installs Apache, PHP, MySQL sever and required modules for deployment of Magento.
 It configures Apache VirtualHosts, optionally imports Magento sample data, installs Wiz and creates an admin user.
