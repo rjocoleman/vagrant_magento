@@ -1,4 +1,4 @@
-version "0.1.0"
+version "0.1.1"
 description "A Chef cookbook for deployment of Magento with Vagrant."
 
 supports "ubuntu"
