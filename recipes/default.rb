@@ -123,7 +123,7 @@ ENV['MAGE_KEY'] = node['vagrant_magento']['config']['mage_key']
 execute "generate local.xml" do
   command "php /vagrant/deploy_support/local_xml_generator.php"
   not_if { node['vagrant_magento']['config']['generate'] == false }
-  action :run 
+  action :run
 end
 
 #create an arbitrary SQL file for our database configuration
@@ -137,5 +137,6 @@ end
 execute "create admin" do
   command "mysql -u root -p#{node['mysql']['server_root_password']} #{node['vagrant_magento']['config']['database']} < #{Chef::Config[:file_cache_path]}/mage-db-config.sql"
   not_if { node['vagrant_magento']['admin']['create'] == false }
+  not_if { node['vagrant_magento']['sample_data']['install'] == false }
   action :run
 end
