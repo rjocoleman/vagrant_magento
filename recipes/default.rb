@@ -10,6 +10,11 @@ include_recipe "php::module_curl"
 include_recipe "apache2"
 include_recipe "apache2::mod_php5"
 
+#we need unzip for magento-check (at least)
+package "unzip" do
+  action :install
+end
+
 #add mod_rewrite
 apache_module "rewrite" do
   enable true
@@ -19,7 +24,6 @@ end
 package "php5-mcrypt" do
   action :install
 end
-
 
 #disable default virtualhost.
 apache_site "default" do
@@ -38,14 +42,9 @@ end
 #create a phpinfo file for use in our Apache vhost
 template "/var/www/phpinfo.php" do
   mode "0644"
-  source "phpinfo.erb"
+  source "phpinfo.php.erb"
   not_if { node['vagrant_magento']['phpinfo_enabled'] == false }
   notifies :restart, "service[apache2]"
-end
-
-#we need unzip for magento-check (at least)
-package "unzip" do
-  action :install
 end
 
 #get magento check system requirements script
@@ -66,7 +65,7 @@ execute "extract magento check" do
 end
 
 #create a mysql database
-mysql_database node['vagrant_magento']['sample_data']['database'] do
+mysql_database node['vagrant_magento']['config']['database'] do
   connection ({:host => "localhost", :username => 'root', :password => node['mysql']['server_root_password']})
   action :create
 end
@@ -100,7 +99,7 @@ end
 
 #import sample data
 execute "import sample data" do
-  command "mysql -u root -p#{node['mysql']['server_root_password']} #{node['vagrant_magento']['sample_data']['database']} < #{Chef::Config[:file_cache_path]}/magento-sample-data-1.6.1.0/magento_sample_data_for_1.6.1.0.sql"
+  command "mysql -u root -p#{node['mysql']['server_root_password']} #{node['vagrant_magento']['config']['database']} < #{Chef::Config[:file_cache_path]}/magento-sample-data-1.6.1.0/magento_sample_data_for_1.6.1.0.sql"
   not_if { node['vagrant_magento']['sample_data']['install'] == false }
   action :run
 end
@@ -119,7 +118,6 @@ ENV['DB1_PASS'] = node['vagrant_magento']['config']['db1_pass']
 ENV['DB1_HOST'] = node['vagrant_magento']['config']['db1_host']
 ENV['DB_PREFIX'] = node['vagrant_magento']['config']['db_prefix']
 ENV['MAGE_KEY'] = node['vagrant_magento']['config']['mage_key']
-ENV['BASE_URL'] = node['vagrant_magento']['config']['base_url']
 
 #generate local.xml
 execute "generate local.xml" do
@@ -128,28 +126,16 @@ execute "generate local.xml" do
   action :run 
 end
 
-#get wiz
-git "/usr/local/Wiz" do
-  repository "https://github.com/nvahalik/Wiz.git"
-  action :checkout
-  revision "master"
-  not_if { node['vagrant_magento']['wiz']['enable'] == false }
+#create an arbitrary SQL file for our database configuration
+template "#{Chef::Config[:file_cache_path]}/mage-db-config.sql" do
+  mode "0644"
+  source "mage-db-config.sql.erb"
+  not_if { node['vagrant_magento']['admin']['create'] == false }
 end
 
-#install Wiz
-execute "install wiz" do
-  command "ln -s /usr/local/Wiz/wiz /usr/local/bin/wiz"
-  not_if { node['vagrant_magento']['wiz']['enable'] == false }
-  not_if { File.exists?("/usr/local/bin/wiz") }
-  not_if { File.exists?("/etc/bash_completion.d/wiz.bash_completion.sh") }
-  action :run
-end
-
-#create admin (viz Wiz)
-execute "wiz: create admin" do
-  cwd "/vagrant"
-  #wiz admin-createadmin <username> <firstname> <lastname> <email> <password>
-  command "wiz admin-createadmin #{node['vagrant_magento']['wiz']['admin_user']} #{node['vagrant_magento']['wiz']['admin_firstname']} #{node['vagrant_magento']['wiz']['admin_lastname']}  #{node['vagrant_magento']['wiz']['admin_email']} #{node['vagrant_magento']['wiz']['admin_pass']}"
-  not_if { node['vagrant_magento']['wiz']['create_admin'] == false }
+#create admin
+execute "create admin" do
+  command "mysql -u root -p#{node['mysql']['server_root_password']} #{node['vagrant_magento']['config']['database']} < #{Chef::Config[:file_cache_path]}/mage-db-config.sql"
+  not_if { node['vagrant_magento']['admin']['create'] == false }
   action :run
 end

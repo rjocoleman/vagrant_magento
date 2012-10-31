@@ -1,0 +1,14 @@
+/* Data for the table `admin_user` */
+
+insert into `admin_user`(`firstname`,`lastname`,`email`,`username`,`password`) 
+values (
+"<%= node['vagrant_magento']['admin']['firstname'] %>", 
+"<%= node['vagrant_magento']['admin']['lastname'] %>",
+"<%= node['vagrant_magento']['admin']['email'] %>",
+"<%= node['vagrant_magento']['admin']['username'] %>",
+"<%= Digest::MD5.hexdigest(node['vagrant_magento']['admin']['salt'] + node['vagrant_magento']['admin']['password']) + ':' + node['vagrant_magento']['admin']['salt'] %>"
+);
+
+/* Data for the table `admin_role` */
+
+insert into `admin_role`(`parent_id`,`tree_level`,`role_type`,`user_id`,`role_name`) values (1,2,"U",LAST_INSERT_ID(),"<%= node['vagrant_magento']['admin']['username'] %>");

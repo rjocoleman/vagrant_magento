@@ -4,10 +4,10 @@ vagrant_magento Cookbook
 [![Build Status](https://secure.travis-ci.org/rjocoleman/vagrant_magento.png)](http://travis-ci.org/rjocoleman/vagrant_magento)
 
 This cookbook installs Apache, PHP, MySQL sever and required modules for deployment of Magento.
-It configures Apache VirtualHosts, optionally imports Magento sample data, installs Wiz and creates an admin user.
+It configures Apache VirtualHosts, optionally imports Magento sample data and creates an admin user.
 Designed for use with [Vagrant](http://www.vagrantup.com/).
 
-It's a work in progress; currently only tested on Mac OS X 10.8.
+It's a work in progress; currently only tested on Mac OS X 10.8 and Windows 7 x64.
 Used with https://github.com/rjocoleman/vagrant-magento-mirror
 
 
@@ -50,12 +50,12 @@ Contributing
 Todo
 ----
 
+* More robust admin creation.
 * Importing an existing database.
-* `WIZ_MAGE_ROOT` not working.
 * mod_rewrite support.
-* Cross platform compatibility RHEL/Centos/ZendServer guest and Windows developer machine.
+* Cross platform compatibility RHEL/Centos/ZendServer guests.
 * Cope with different sample data versions.
-* allow the prefixing sample data.
+* Allow the prefixing sample data (and admin user).
 * Make things more generic and portable.
 * Testing, testing, testing and more testing.
 * Caching mechanisms.
