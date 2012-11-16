@@ -1,11 +1,15 @@
-version "0.1.2"
+name "vagrant_magento"
+version "0.1.5"
 description "A Chef cookbook for deployment of Magento with Vagrant."
 
 supports "ubuntu"
 
-depends "apache2"
+depends "apt"
+depends "build-essential"
+depends "git"
 depends "mysql"
 depends "database"
-depends "git"
 depends "php"
-depends "apt"
+depends "apache2"
+
+recipe "vagrant_magento", "Main configuration for Magento"

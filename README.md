@@ -50,18 +50,13 @@ Contributing
 Todo
 ----
 
-* More robust admin creation.
-* Importing an existing database.
 * mod_rewrite support.
 * Cross platform compatibility RHEL/Centos/ZendServer guests.
-* Cope with different sample data versions.
-* Allow the prefixing sample data (and admin user).
-* Make things more generic and portable.
-* Testing, testing, testing and more testing.
-* Caching mechanisms.
-  + Dependancies.
-  + Mage config.
-  + Vagrant (chef) options.
+* BYO DB.
+* BYO local.xml
+* clear cache hardout
+* refresh indexes
+* admin notifications
 
 
 License and Author
