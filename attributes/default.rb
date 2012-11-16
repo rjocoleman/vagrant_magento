@@ -6,6 +6,9 @@ default['vagrant_magento']['mage_check_enabled'] = false                   #add 
 
 default['vagrant_magento']['sample_data']['install'] = false               #install Magento sample data
 
+default['vagrant_magento']['reindex'] = false                              #reindex Magento once deployed
+default['vagrant_magento']['clearcache'] = false                           #clear Magento cache once deployed
+
 default['vagrant_magento']['config']['install'] = false                    #install magento database via magento install
 default['vagrant_magento']['config']['locale'] = "en_US"                   #required, Time Zone
 default['vagrant_magento']['config']['timezone'] = "America/Los_Angeles"   #required, Time Zone
@@ -24,14 +27,14 @@ default['vagrant_magento']['config']['db_prefix'] = ""                     #opti
                                                                            
 default['vagrant_magento']['config']['session_save'] = "files"             #optional, where to store session data - in db or files. files by default
 default['vagrant_magento']['config']['admin_frontname'] = ""               #optional, admin panel path, "admin" by default
-default['vagrant_magento']['config']['url'] = "http://localhost:1080/"     #required, URL the store is supposed to be available at
+default['vagrant_magento']['config']['url'] = "{{base_url}}"               #required, URL the store is supposed to be available at
 default['vagrant_magento']['config']['skip_url_validation'] = "yes"        #optional, skip validating base url during installation or not. No by default
 default['vagrant_magento']['config']['use_rewrites'] = "yes"               #optional, Use Web Server (Apache) Rewrites,
                                                                            #You could enable this option to use web server rewrites functionality for improved SEO
                                                                            #Please make sure that mod_rewrite is enabled in Apache configuration
                                                                            
 default['vagrant_magento']['config']['use_secure'] = "no"                  #optional, Use Secure URLs (SSL). Enable this option only if you have SSL available.
-default['vagrant_magento']['config']['secure_base_url'] = "{base_url}"     #optional, Secure Base URL
+default['vagrant_magento']['config']['secure_base_url'] = "{{base_url}}"   #optional, Secure Base URL
                                                                            #Provide a complete base URL for SSL connection.
                                                                            #For example: https://www.mydomain.com/magento/
                                                                            
