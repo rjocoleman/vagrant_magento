@@ -26,7 +26,7 @@ default['vagrant_magento']['config']['session_save'] = "files"             #opti
 default['vagrant_magento']['config']['admin_frontname'] = ""               #optional, admin panel path, "admin" by default
 default['vagrant_magento']['config']['url'] = "http://localhost:1080/"     #required, URL the store is supposed to be available at
 default['vagrant_magento']['config']['skip_url_validation'] = "yes"        #optional, skip validating base url during installation or not. No by default
-default['vagrant_magento']['config']['use_rewrites'] = "no"                #optional, Use Web Server (Apache) Rewrites,
+default['vagrant_magento']['config']['use_rewrites'] = "yes"               #optional, Use Web Server (Apache) Rewrites,
                                                                            #You could enable this option to use web server rewrites functionality for improved SEO
                                                                            #Please make sure that mod_rewrite is enabled in Apache configuration
                                                                            
