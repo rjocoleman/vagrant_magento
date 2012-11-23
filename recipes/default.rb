@@ -31,6 +31,12 @@ package "php5-mcrypt" do
   action :install
 end
 
+#add libsqlite3-dev mcrypt
+package "libsqlite3-dev" do
+  action :install
+end
+
+
 #disable default virtualhost.
 apache_site "default" do
   enable false
@@ -247,4 +253,31 @@ execute "magento-clearcache" do
   not_if { node['vagrant_magento']['clearcache'] == false }
   only_if { File.exists?("#{Chef::Config[:file_cache_path]}/cacheclear.php") }
   action :run
+end
+
+#add mailcatcher if it's enabled
+gem_package "mailcatcher" do
+  not_if { node['vagrant_magento']['mailcatcher'] == false }
+  
+  action :install
+end
+# Get eth1 ip
+eth1_ip = node[:network][:interfaces][:eth1][:addresses].select{|key,val| val[:family] == 'inet'}.flatten[0]
+
+# Setup MailCatcher
+bash "mailcatcher" do
+  code "mailcatcher --http-ip #{eth1_ip}"
+  
+  not_if { node['vagrant_magento']['mailcatcher'] == false }
+end
+
+template "#{node['php']['ext_conf_dir']}/mailcatcher.ini" do
+  source "mailcatcher.ini.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+  action :create
+  notifies :restart, resources("service[apache2]"), :delayed
+  
+  not_if { node['vagrant_magento']['mailcatcher'] == false }
 end
