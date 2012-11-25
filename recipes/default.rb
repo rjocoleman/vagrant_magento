@@ -262,7 +262,7 @@ gem_package "mailcatcher" do
   action :install
 end
 # Get eth1 ip
-eth1_ip = node[:network][:interfaces][:eth1][:addresses].select{|key,val| val[:family] == 'inet'}.flatten[0]
+eth1_ip = node['network']['interfaces']['eth1']['addresses'].select{|key,val| val['family'] == 'inet'}.flatten[0]
 
 # Setup MailCatcher
 bash "mailcatcher" do
