@@ -11,6 +11,7 @@ include_recipe "apache2"
 include_recipe "apache2::mod_php5"
 
 chef_gem "versionomy"
+require "versionomy"
 
 class Chef::Resource
   include MageHelper
@@ -31,7 +32,7 @@ end
 #disable default virtualhost.
 apache_site "default" do
   enable false
-
+  
   notifies :restart, "service[apache2]"
 end
 
@@ -40,7 +41,7 @@ web_app "magento_dev" do
   server_name node['hostname']
   server_aliases node['fqdn'], node['host_name']
   docroot node['vagrant_magento']['mage']['dir']
-
+  
   notifies :restart, "service[apache2]", :immediately
 end
 
@@ -49,7 +50,7 @@ template "/var/www/phpinfo.php" do
   mode "0644"
   source "phpinfo.php.erb"
   backup false
-
+  
   not_if { node['vagrant_magento']['phpinfo_enabled'] == false }
   notifies :restart, "service[apache2]", :immediately
 end
@@ -60,7 +61,7 @@ remote_file "#{Chef::Config[:file_cache_path]}/magento-check.zip" do
   backup false
   mode "0644"
   checksum "bb61351788759da0c852ec50d703634f49c0076978ddf0b2d3dc2bc3f012666a"
-
+  
   not_if { node['vagrant_magento']['mage_check_enabled'] == false }
 end
 
@@ -68,7 +69,7 @@ end
 execute "magento-check-extract" do
   cwd Chef::Config[:file_cache_path]
   command "unzip -o #{Chef::Config[:file_cache_path]}/magento-check.zip -d /var/www"
-
+  
   not_if { node['vagrant_magento']['mage_check_enabled'] == false }
   action :run
 end
@@ -79,28 +80,37 @@ mysql_database node['vagrant_magento']['config']['db_name'] do
   action :create
 end
 
-#get the sample data
-remote_file "#{Chef::Config[:file_cache_path]}/magento-sample-data.tar.gz" do
-  #source get_sample_data_url
-  source "http://www.magentocommerce.com/downloads/assets/#{get_sample_data_ver}/magento-sample-data-#{get_sample_data_ver}.tar.gz"  
-  backup false
-  mode "0644"
+#sample-data
+ruby_block "sample-data" do
+  block do
+    # doing nothing, hack to do this sample data stuff at convergence so that we can look at PHP's versions etc.
+  end
+  action :create
   
   not_if { node['vagrant_magento']['sample_data']['install'] == false }
   only_if { `which php` != false }
-  action :create
   
+  notifies :create, "remote_file[#{Chef::Config[:file_cache_path]}/magento-sample-data.tar.gz]", :immediately
   notifies :run, "execute[sample-data-extract]", :immediately
   notifies :create, "ruby_block[sample-data-prefix]", :immediately
   notifies :run, "execute[sample-data-import]", :immediately
   notifies :run, "execute[sample-data-copy]", :immediately
 end
 
+#get the sample data
+remote_file "#{Chef::Config[:file_cache_path]}/magento-sample-data.tar.gz" do
+  source "http://www.magentocommerce.com/downloads/assets/#{get_sample_data_ver}/magento-sample-data-#{get_sample_data_ver}.tar.gz"  
+  backup false
+  mode "0644"
+  
+  action :nothing
+end
+
 #extract sample data
 execute "sample-data-extract" do
   cwd Chef::Config[:file_cache_path]
   command "tar zxf #{Chef::Config[:file_cache_path]}/magento-sample-data.tar.gz"
-
+  
   not_if { node['vagrant_magento']['sample_data']['install'] == false }
   only_if { File.exists?("#{Chef::Config[:file_cache_path]}/magento-sample-data.tar.gz") }
   action :nothing
@@ -111,10 +121,10 @@ ruby_block "sample-data-prefix" do
   block do
     db_prefix = node['vagrant_magento']['config']['db_prefix']
     sample_data = "#{Chef::Config[:file_cache_path]}/magento-sample-data-#{get_sample_data_ver}/magento_sample_data_for_#{get_sample_data_ver}.sql"
-
+    
     if File.file?(sample_data) then
       read_data = File.open(sample_data, 'rb').read
-
+      
       replacements = [ 
         ["/TABLES `/i", "TABLES `#{db_prefix}"], 
         ["/TABLE `/i", "TABLE `#{db_prefix}"], 
@@ -125,14 +135,13 @@ ruby_block "sample-data-prefix" do
       replacements.each do |replacement| 
         read_data.gsub! replacement[0], replacement[1]
       end
-
+      
       File.open(sample_data, 'w') { |f|
         f.puts read_data
       }
     end
   end
 
-  not_if { node['vagrant_magento']['sample_data']['install'] == false }
   action :nothing 
 end
 
@@ -140,15 +149,13 @@ end
 execute "sample-data-import" do
   command "mysql -u root -p#{node['mysql']['server_root_password']} #{node['vagrant_magento']['config']['db_name']} < #{Chef::Config[:file_cache_path]}/magento-sample-data-#{get_sample_data_ver}/magento_sample_data_for_#{get_sample_data_ver}.sql"
 
-  not_if { node['vagrant_magento']['sample_data']['install'] == false }
   action :nothing
 end
 
 #copy sample data
 execute "sample-data-copy" do
   command "cp -r #{Chef::Config[:file_cache_path]}/magento-sample-data-#{get_sample_data_ver}/media #{node['vagrant_magento']['mage']['dir']}"
-
-  not_if { node['vagrant_magento']['sample_data']['install'] == false }
+  
   action :nothing
 end
 
@@ -171,7 +178,7 @@ execute "magento-install" do
     "--admin_username #{node['vagrant_magento']['config']['admin_username']}",
     "--admin_password #{node['vagrant_magento']['config']['admin_password']}",
   ]
-
+  
   args << "--db_prefix #{node['vagrant_magento']['config']['db_prefix']}" unless node['vagrant_magento']['config']['db_prefix'].empty?
   args << "--session_save #{node['vagrant_magento']['config']['session_save']}" unless node['vagrant_magento']['config']['session_save'].empty?
   args << "--admin_frontname #{node['vagrant_magento']['config']['admin_frontname']}" unless node['vagrant_magento']['config']['admin_frontname'].empty?
@@ -182,10 +189,10 @@ execute "magento-install" do
   args << "--use_secure_admin #{node['vagrant_magento']['config']['use_secure_admin']}" unless node['vagrant_magento']['config']['use_secure_admin'].empty?
   args << "--enable_charts #{node['vagrant_magento']['config']['enable_charts']}" unless node['vagrant_magento']['config']['enable_charts'].empty?
   args << "--encryption_key #{node['vagrant_magento']['config']['encryption_key']}" unless node['vagrant_magento']['config']['encryption_key'].empty?
-
+  
   cwd node['vagrant_magento']['mage']['dir']
   command "php -f install.php -- #{args.join(' ')}"
-
+  
   not_if { File.exists?("#{node['vagrant_magento']['mage']['dir']}/app/etc/local.xml") }
   not_if { node['vagrant_magento']['config']['install'] == false }
   action :run
@@ -196,9 +203,8 @@ end
 #HACK: to set unsecure base_url to {{base_url}} 
 execute "reset-unsecure-base_url" do
   db_prefix = node['vagrant_magento']['config']['db_prefix']
-#  command "mysql -u root -p#{node['mysql']['server_root_password']} #{node['vagrant_magento']['config']['db_name']} -e \"UPDATE \"#{db_prefix}core_config_data\" SET \"value\" = '{{base_url}}' WHERE \"path\" = 'web/unsecure/base_url'\""
   command "mysql -u root -p#{node['mysql']['server_root_password']} #{node['vagrant_magento']['config']['db_name']} -e \"DELETE FROM \"#{db_prefix}core_config_data\" WHERE \"path\" = 'web/unsecure/base_url'\""
-
+  
   only_if { node['vagrant_magento']['config']['url']  == "{{base_url}}" }
   
   action :nothing
@@ -207,11 +213,10 @@ end
 #HACK: to set secure base_url to {{base_url}} 
 execute "reset-secure-base_url" do
   db_prefix = node['vagrant_magento']['config']['db_prefix']
-#  command "mysql -u root -p#{node['mysql']['server_root_password']} #{node['vagrant_magento']['config']['db_name']} -e \"UPDATE \"#{db_prefix}core_config_data\" SET \"value\" = '{{base_url}}' WHERE \"path\" = 'web/secure/base_url'\""
   command "mysql -u root -p#{node['mysql']['server_root_password']} #{node['vagrant_magento']['config']['db_name']} -e \"DELETE FROM \"#{db_prefix}core_config_data\" WHERE \"path\" = 'web/secure/base_url'\""
-
+  
   only_if { [node['vagrant_magento']['config']['url']  == "{{base_url}}" && node['vagrant_magento']['config']['secure_url']  == ""] || [node['vagrant_magento']['config']['secure_url']  == "{{base_url}}"] }
-
+  
   action :nothing
   notifies :run, "execute[magento-clearcache]", :immediately 
 end
@@ -220,7 +225,7 @@ end
 execute "magento-reindex" do
   cwd node['vagrant_magento']['mage']['dir']
   command "php shell/indexer.php --reindex"
-
+  
   not_if { node['vagrant_magento']['reindex'] == false }
   action :run
 end
@@ -230,7 +235,7 @@ template "#{Chef::Config[:file_cache_path]}/cacheclear.php" do
   mode "0644"
   source "cacheclear.php.erb"
   backup false
-
+  
   not_if { node['vagrant_magento']['clearcache'] == false }
   action :create
 end
@@ -240,7 +245,7 @@ end
 execute "magento-clearcache" do
   cwd Chef::Config[:file_cache_path]
   command "php cacheclear.php -- all"
-
+  
   not_if { node['vagrant_magento']['clearcache'] == false }
   only_if { File.exists?("#{Chef::Config[:file_cache_path]}/cacheclear.php") }
   action :run

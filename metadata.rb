@@ -1,5 +1,5 @@
 name "vagrant_magento"
-version "0.1.8"
+version "0.1.9"
 description "A Chef cookbook for deployment of Magento with Vagrant."
 
 supports "ubuntu"
