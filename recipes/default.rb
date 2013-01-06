@@ -16,26 +16,17 @@ class Chef::Resource
   include MageHelper
 end
 
-#we need unzip for magento-check
-package "unzip" do
-  action :install
+#install apt packages
+%w{unzip libsqlite3-dev php5-mcrypt}.each do |pkg|
+  package pkg do
+    action :upgrade
+  end
 end
 
 #add mod_rewrite
 apache_module "rewrite" do
   enable true
 end
-
-#add php extension mcrypt
-package "php5-mcrypt" do
-  action :install
-end
-
-#add libsqlite3-dev mcrypt
-package "libsqlite3-dev" do
-  action :install
-end
-
 
 #disable default virtualhost.
 apache_site "default" do
