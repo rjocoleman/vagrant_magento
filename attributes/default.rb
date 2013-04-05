@@ -3,7 +3,6 @@ default['vagrant_magento']['mage']['dir'] = "/vagrant/"                    #mage
 
 default['vagrant_magento']['phpinfo_enabled'] = false                      #add an alias for a /phpinfo.php file
 default['vagrant_magento']['mage_check_enabled'] = false                   #add an alias for a /magento-check.php file
-default['vagrant_magento']['mailcatcher'] = false                          #install mailcatcher (http://mailcatcher.me)
 
 default['vagrant_magento']['sample_data']['install'] = false               #install Magento sample data
 
