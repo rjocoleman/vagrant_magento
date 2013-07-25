@@ -59,5 +59,5 @@ override['mysql']['tunable']['innodb_buffer_pool_size'] = "32M"
 
 override['mysql']['server_root_password'] = node['vagrant_magento']['config']['db_pass']
 
-node['mysql']['server_repl_password'] = "root"
-node['mysql']['server_debian_password'] = "root"
+override['mysql']['server_repl_password'] = "root"
+override['mysql']['server_debian_password'] = "root"
